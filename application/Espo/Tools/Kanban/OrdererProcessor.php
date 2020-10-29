@@ -44,6 +44,8 @@ class OrdererProcessor
 
     private $userId = null;
 
+    private $maxNumber = 50;
+
     private $entityManager;
 
     private $metadata;
@@ -71,6 +73,13 @@ class OrdererProcessor
     public function setUserId(string $userId) : self
     {
         $this->userId = $userId;
+
+        return $this;
+    }
+
+    public function setMaxNumber(int $maxNumber) : self
+    {
+        $this->maxNumber = $maxNumber;
 
         return $this;
     }
