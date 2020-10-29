@@ -53,6 +53,8 @@ class Kanban
 
     protected $userId = null;
 
+    protected $maxOrderNumber = 50;
+
     const MAX_GROUP_LENGTH = 100;
 
     protected $metadata;
@@ -100,6 +102,13 @@ class Kanban
     public function setUserId(string $userId) : self
     {
         $this->userId = $userId;
+
+        return $this;
+    }
+
+    public function setMaxOrderNumber(int $maxOrderNumber) : self
+    {
+        $this->maxOrderNumber = $maxOrderNumber;
 
         return $this;
     }
@@ -182,7 +191,7 @@ class Kanban
             $newOrder = $selectParamsSub['orderBy'] ?? [];
 
             array_unshift($newOrder, [
-                'kanbanOrder.order',
+                'COALESCE:(kanbanOrder.order, ' . strval($this->maxOrderNumber + 1) . ')',
                 'ASC',
             ]);
 

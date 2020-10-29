@@ -726,6 +726,8 @@ define('views/record/kanban', ['views/record/list'], function (Dep) {
             } else {
                 $item.remove();
             }
+
+            this.storeGroupOrder(group);
         },
 
         groupShowMore: function (group) {
@@ -780,10 +782,6 @@ define('views/record/kanban', ['views/record/list'], function (Dep) {
                 statusField: this.statusField,
             }, function (view) {
                 view.render();
-
-                this.listenToOnce(view, 'move', function (group) {
-                    this.storeGroupOrder(group);
-                }, this);
             });
         },
 
