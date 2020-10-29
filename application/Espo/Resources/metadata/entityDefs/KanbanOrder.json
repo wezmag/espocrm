@@ -24,6 +24,12 @@
     "indexes": {
         "entityUserId": {
             "columns": ["entityType", "entityId", "userId"]
+        },
+        "entityType": {
+            "columns": ["entityType"]
+        },
+        "entityTypeUserId": {
+            "columns": ["entityType", "userId"]
         }
     }
 }

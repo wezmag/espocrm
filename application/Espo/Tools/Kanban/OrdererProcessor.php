@@ -87,6 +87,104 @@ class OrdererProcessor
     public function order(array $ids)
     {
         $this->validate();
+
+        $count = count($ids);
+
+        if (!$count) {
+            return;
+        }
+
+        $this->entityManager
+            ->getTransactionManager()
+            ->start();
+
+        $deleteQuery = $this->entityManager
+            ->getQueryBuilder()
+            ->delete()
+            ->from('KanbanOrder')
+            ->where([
+                'entityType' => $this->entityType,
+                'userId' => $this->userId,
+                'entityId' => $ids,
+            ])
+            ->build();
+
+        $this->entityManager->getQueryExecutor()->execute($deleteQuery);
+
+        $minOrder = null;
+
+        $first = $this->entityManager
+            ->getRepository('KanbanOrder')
+            ->select(['id', 'order'])
+            ->where([
+                'entityType' => $this->entityType,
+                'userId' => $this->userId,
+                'group' => $this->group,
+            ])
+            ->order('order')
+            ->findOne();
+
+        if ($first) {
+            $minOrder = $first->get('order');
+        }
+
+        if ($minOrder !== null) {
+            $offset = $count - $minOrder;
+
+            $updateQuery = $this->entityManager
+                ->getQueryBuilder()
+                ->update()
+                ->in('KanbanOrder')
+                ->where([
+                    'entityType' => $this->entityType,
+                    'group' => $this->group,
+                    'userId' => $this->userId,
+                ])
+                ->set([
+                    'order:' => 'ADD:(order, ' . strval($offset) . ')'
+                ])
+                ->build();
+
+            $this->entityManager->getQueryExecutor()->execute($updateQuery);
+        }
+
+        $collection = $this->entityManager
+            ->getCollectionFactory()
+            ->create('KanbanOrder');
+
+        foreach ($ids as $i => $id) {
+            $item = $this->entityManager->getEntity('KanbanOrder');
+
+            $item->set([
+                'entityId' => $id,
+                'entityType' => $this->entityType,
+                'group' => $this->group,
+                'userId' => $this->userId,
+                'order' => $i,
+            ]);
+
+            $collection[] = $item;
+        }
+
+        $this->entityManager->getMapper()->massInsert($collection);
+
+        $deleteQuery = $this->entityManager
+            ->getQueryBuilder()
+            ->delete()
+            ->from('KanbanOrder')
+            ->where([
+                'entityType' => $this->entityType,
+                'group' => $this->group,
+                'userId' => $this->userId,
+                'order>' => $this->maxNumber,
+            ])
+            ->build();
+
+        $this->entityManager->getQueryExecutor()->execute($deleteQuery);
+
+        $this->entityManager
+            ->getTransactionManager()
+            ->commit();
     }
 
     private function validate()
