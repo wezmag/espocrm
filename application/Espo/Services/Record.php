@@ -1366,6 +1366,7 @@ class Record implements Crud,
             ->setSearchParams($params)
             ->setCountDisabled($disableCount)
             ->setMaxSelectTextAttributeLength($this->getMaxSelectTextAttributeLength())
+            ->setUserId($this->getUser()->id)
             ->getResult();
     }
 

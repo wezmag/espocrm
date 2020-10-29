@@ -34,11 +34,11 @@ use Espo\Core\{
     Utils\Metadata,
     Select\SelectManagerFactory,
     ORM\EntityManager,
-    //Record\Collection as RecordCollection,
 };
 
 use Espo\{
     Services\Record as RecordService,
+    ORM\QueryParams\Select as SelectQuery,
 };
 
 class Kanban
@@ -50,6 +50,8 @@ class Kanban
     protected $searchParams = [];
 
     protected $maxSelectTextAttributeLength = null;
+
+    protected $userId = null;
 
     protected $metadata;
     protected $selectManagerFactory;
@@ -89,6 +91,13 @@ class Kanban
     public function setCountDisabled(bool $countDisabled) : self
     {
         $this->countDisabled = $countDisabled;
+
+        return $this;
+    }
+
+    public function setUserId(string $userId) : self
+    {
+        $this->userId = $userId;
 
         return $this;
     }
@@ -159,14 +168,45 @@ class Kanban
             $selectParamsSub = $selectParams;
 
             $selectParamsSub['whereClause'][] = [
-                $statusField => $status
+                $statusField => $status,
             ];
 
             $o = (object) [
                 'name' => $status,
             ];
 
-            $collectionSub = $repository->find($selectParamsSub);
+            $query = SelectQuery::fromRaw($selectParamsSub);
+
+            $newOrder = $selectParamsSub['orderBy'] ?? [];
+
+            array_unshift($newOrder, [
+                'kanbanOrder.order',
+                'ASC',
+            ]);
+
+            if ($this->userId) {
+                $builder = $this->entityManager
+                    ->getQueryBuilder()
+                    ->select()
+                    ->clone($query)
+                    ->order($newOrder)
+                    ->leftJoin(
+                        'KanbanOrder',
+                        'kanbanOrder',
+                        [
+                            'kanbanOrder.entityType' => $this->entityType,
+                            'kanbanOrder.id:' => 'id',
+                            'kanbanOrder.group' => $status,
+                            'kanbanOrder.userId' => $this->userId,
+                        ]
+                    );
+
+                $query = $builder->build();
+            }
+
+            $collectionSub = $repository
+                ->clone($query)
+                ->find();
 
             if (!$this->countDisabled) {
                 $totalSub = $repository->count($selectParamsSub);
