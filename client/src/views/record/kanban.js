@@ -519,7 +519,9 @@ define('views/record/kanban', ['views/record/list'], function (Dep) {
                     var collection = this.seedCollection.clone();
 
                     collection.total = item.total;
-                    collection.url = this.scope;
+                    //collection.url = this.scope;
+                    collection.url = this.collection.url;
+
                     collection.where = this.collection.where;
                     collection.name = this.seedCollection.name;
                     collection.maxSize = this.seedCollection.maxSize;
