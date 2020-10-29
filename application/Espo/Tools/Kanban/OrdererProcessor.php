@@ -32,6 +32,7 @@ namespace Espo\Tools\Kanban;
 use Espo\Core\{
     ORM\EntityManager,
     Utils\Metadata,
+    Utils\Util,
 };
 
 use LogicException;
@@ -50,6 +51,8 @@ class OrdererProcessor
 
     private $metadata;
 
+    const MAX_GROUP_LENGTH = 100;
+
     public function __construct(EntityManager $entityManager, Metadata $metadata)
     {
         $this->entityManager = $entityManager;
@@ -65,6 +68,8 @@ class OrdererProcessor
 
     public function setGroup(string $group) : self
     {
+        $group = mb_substr($group, 0, self::MAX_GROUP_LENGTH);
+
         $this->group = $group;
 
         return $this;
@@ -156,6 +161,7 @@ class OrdererProcessor
             $item = $this->entityManager->getEntity('KanbanOrder');
 
             $item->set([
+                'id' => Util::generateId(),
                 'entityId' => $id,
                 'entityType' => $this->entityType,
                 'group' => $this->group,

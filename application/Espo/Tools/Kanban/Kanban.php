@@ -53,6 +53,8 @@ class Kanban
 
     protected $userId = null;
 
+    const MAX_GROUP_LENGTH = 100;
+
     protected $metadata;
     protected $selectManagerFactory;
     protected $entityManager;
@@ -185,6 +187,7 @@ class Kanban
             ]);
 
             if ($this->userId) {
+                $group = mb_substr($status, 0, self::MAX_GROUP_LENGTH);
                 $builder = $this->entityManager
                     ->getQueryBuilder()
                     ->select()
@@ -196,7 +199,7 @@ class Kanban
                         [
                             'kanbanOrder.entityType' => $this->entityType,
                             'kanbanOrder.id:' => 'id',
-                            'kanbanOrder.group' => $status,
+                            'kanbanOrder.group' => $group,
                             'kanbanOrder.userId' => $this->userId,
                         ]
                     );
