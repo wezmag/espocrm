@@ -188,6 +188,7 @@ class Kanban
 
             if ($this->userId) {
                 $group = mb_substr($status, 0, self::MAX_GROUP_LENGTH);
+
                 $builder = $this->entityManager
                     ->getQueryBuilder()
                     ->select()
@@ -198,7 +199,7 @@ class Kanban
                         'kanbanOrder',
                         [
                             'kanbanOrder.entityType' => $this->entityType,
-                            'kanbanOrder.id:' => 'id',
+                            'kanbanOrder.entityId:' => 'id',
                             'kanbanOrder.group' => $group,
                             'kanbanOrder.userId' => $this->userId,
                         ]
