@@ -78,10 +78,18 @@ define('views/modals/kanban-move-over', 'views/modal', function (Dep) {
 
         moveTo: function (status) {
             var attributes = {};
+
             attributes[this.statusField] = status;
-            this.model.save(attributes, {patch: true}).then(function () {
-                Espo.Ui.success(this.translate('Done'));
-            }.bind(this));
+
+            this.trigger('move', status);
+
+            this.model
+                .save(attributes, {patch: true})
+                .then(function () {
+                    Espo.Ui.success(this.translate('Done'));
+
+                }.bind(this));
+
             this.close();
         },
 

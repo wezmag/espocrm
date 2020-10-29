@@ -780,6 +780,10 @@ define('views/record/kanban', ['views/record/list'], function (Dep) {
                 statusField: this.statusField,
             }, function (view) {
                 view.render();
+
+                this.listenToOnce(view, 'move', function (group) {
+                    this.storeGroupOrder(group);
+                }, this);
             });
         },
 
