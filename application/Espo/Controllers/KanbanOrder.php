@@ -78,6 +78,10 @@ class KanbanOrder
             throw new Forbidden();
         }
 
+        if ($this->user->isPortal()) {
+            throw new Forbidden();
+        }
+
         $this->orderer
             ->setEntityType($entityType)
             ->setGroup($group)

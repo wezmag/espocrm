@@ -94,6 +94,10 @@ class OrdererProcessor
             throw new LogicException("No user ID.");
         }
 
+        if (! $this->metadata->get(['scopes', $this->entityType, 'object'])) {
+            throw new LogicException("Not allowed entity type.");
+        }
+
         $statusField = $this->metadata->get(['scopes', $this->entityType, 'statusField']);
 
         if (! $statusField) {
